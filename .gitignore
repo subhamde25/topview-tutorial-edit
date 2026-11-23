@@ -1,0 +1,25 @@
+# Client footage, recordings, references, intermediates and drafts (the master lives in deliverables/)
+raw/
+rec/
+ref/
+build/
+renders/
+notes/
+
+# Built media and HyperFrames state (tools/build.py recreates film/assets/)
+film/assets/
+film/.hyperframes/
+film/.impeccable/
+film/AGENTS.md
+film/CLAUDE.md
+
+# Generated wrappers (tools/build_run.sh builds run_*.js from steps_*.js) and scratch
+tools/run_*.js
+tools/*.body
+
+# Tool state and caches
+__pycache__/
+.playwright-mcp/
+*.log
+.DS_Store
+Thumbs.db
