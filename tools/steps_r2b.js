@@ -1,0 +1,11 @@
+const T = []; const t0 = Date.now(); const mark = (s) => T.push([((Date.now() - t0) / 1000).toFixed(2), s]);
+H.pos.set(page, { x: 1300, y: 420 }); await page.waitForTimeout(1500);
+const f = await page.evaluate(() => { const e = [...document.querySelectorAll('*')].find(x => x.children.length === 0 && /vid_20261122_113703_01/.test(x.textContent)); const r = e.getBoundingClientRect(); return [r.x + 60, r.y + r.height / 2]; });
+mark('open card'); await H.click(page, f[0], f[1], { ms: 1100, post: 1500 });
+const vb = await page.locator('video').first().boundingBox();
+const px = vb.x + 25, py = vb.y + vb.height - 48;
+mark('play'); await H.click(page, px, py, { ms: 1000, post: 300 });
+await H.move(page, vb.x + vb.width * 0.55, vb.y + vb.height + 120, 1000);
+await page.waitForTimeout(7500);
+const st = await page.evaluate(() => { const v = document.querySelector('video'); return [v.paused, v.currentTime]; });
+mark('end ' + JSON.stringify(st)); return { T };

@@ -1,0 +1,26 @@
+// RECORDED take 1: Home -> Canvas -> new project -> Video node -> T1 settings -> prompt -> Generate.
+const P = 'A cinematic slow-motion shot of a Japanese tea master pouring matcha in a dimly lit room, steam rising, shallow depth of field, warm golden light from a paper lantern, 4K film grain.';
+const T = []; const t0 = Date.now(); const mark = (s) => T.push([((Date.now() - t0) / 1000).toFixed(2), s]);
+const topmost = async (loc) => { const n = await loc.count(); let best = null; for (let i = 0; i < n; i++) { const b = await loc.nth(i).boundingBox(); if (b && b.width > 0 && (!best || b.y < best.b.y)) best = { i, b }; } return best ? loc.nth(best.i) : null; };
+const lowest = async (loc) => { const n = await loc.count(); let best = null; for (let i = 0; i < n; i++) { const b = await loc.nth(i).boundingBox(); if (b && b.width > 0 && (!best || b.y > best.b.y)) best = { i, b }; } return best ? loc.nth(best.i) : null; };
+const fp = await page.evaluate(() => window.__fcPos || { x: 768, y: 430 }); H.pos.set(page, fp);
+const chipBtn = async () => page.evaluateHandle(() => [...document.querySelectorAll('button')].filter(e => /Topview T1\s*·/.test(e.textContent) && e.textContent.length < 60).pop());
+const chipTxt = async () => page.evaluate(() => { const c = [...document.querySelectorAll('button')].filter(e => /Topview T1\s*·/.test(e.textContent) && e.textContent.length < 60).pop(); return c ? c.textContent.trim() : ''; });
+const cb = await (await chipBtn()).asElement().boundingBox();
+mark('open settings'); await H.click(page, cb.x + cb.width / 2, cb.y + cb.height / 2, { ms: 900, post: 900 });
+const ar = await page.evaluate(() => { const e = [...document.querySelectorAll('button')].filter(b => b.textContent.trim() === '16:9').map(b => b.getBoundingClientRect()).filter(r => r.width > 0).sort((a, b) => a.y - b.y)[0]; return e ? [e.x + e.width / 2, e.y + e.height / 2] : null; });
+if (!ar) return { T, err: 'no 16:9 btn' };
+mark('16:9'); await H.click(page, ar[0], ar[1], { ms: 800, post: 900 });
+mark('close'); await H.click(page, 1250, 300, { ms: 900, post: 1500 });
+let ct = await chipTxt();
+const gen = page.getByRole('button', { name: /Generate/ }).last();
+const [gx, gy] = await H.center(gen);
+mark('hover generate'); await H.move(page, gx, gy, 900); await page.waitForTimeout(1500);
+ct = await chipTxt(); const genText = (await gen.innerText().catch(() => '')).replace(/\s+/g, ' ');
+const typed = (await page.locator('[contenteditable=true]').last().innerText()).trim();
+const ok = /16:9/.test(ct) && /1080p/.test(ct) && /10s/.test(ct) && /\b22\b/.test(genText) && typed.length > 150;
+mark('check ' + ct + ' | ' + genText + ' | typed ' + typed.length + ' ok=' + ok);
+if (!ok) return { T, aborted: true };
+mark('click generate'); await H.click(page, gx, gy, { ms: 100, pre: 100, post: 600 });
+await H.move(page, gx - 300, gy - 260, 1200); await page.waitForTimeout(6000);
+mark('end'); return { T };
